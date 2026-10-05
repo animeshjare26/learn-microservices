@@ -1,0 +1,39 @@
+jwt:
+  secretKey: asdfghjkloiuytrewqsdfghjqwertyuioppoiuytrewqasdfg
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: order-service
+              uri: lb://order-service
+              predicates:
+                - Path=/api/orders/**
+              filters:
+                - StripPrefix=2
+                - name: LoggingOrdersFilter
+                - name: Authentication
+                  args:
+                    isEnabled : true
+            - id: inventory-service
+              uri: lb://inventory-service
+              predicates:
+                - Path=/api/inventory/**
+              filters:
+                - StripPrefix=2
+                - AddRequestHeader=X-Custom-Header,Aj
+                - name: Authentication
+
+#eureka-config
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+server:
+  port: 9090
